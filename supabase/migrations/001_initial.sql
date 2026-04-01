@@ -13,6 +13,7 @@ create table if not exists public.subscribers (
   newsletter  boolean     not null default true,
   status      text        not null default 'active' check (status in ('active', 'unsubscribed')),
   email_sent  boolean     not null default false,
+  source      text        default null,
   created_at  timestamptz not null default now()
 );
 
@@ -262,6 +263,7 @@ returns table (
   newsletter  boolean,
   status      text,
   email_sent  boolean,
+  source      text,
   created_at  timestamptz,
   total_count bigint
 )
@@ -281,7 +283,7 @@ begin
 
   return query
   select
-    s.id, s.name, s.email, s.lang, s.newsletter, s.status, s.email_sent, s.created_at,
+    s.id, s.name, s.email, s.lang, s.newsletter, s.status, s.email_sent, s.source, s.created_at,
     count(*) over() as total_count
   from public.subscribers s
   where
@@ -303,12 +305,17 @@ end;
 $$;
 
 -- Rate-limited signup function (V2 fix: max 10 signups per IP per hour)
+-- Index for A/B test source counting
+create index if not exists idx_subscribers_source
+  on public.subscribers (source);
+
 create or replace function public.rate_limited_signup(
   sub_name       text,
   sub_email      text,
   sub_lang       text,
   sub_newsletter boolean,
-  client_ip_hash text
+  client_ip_hash text,
+  sub_source     text default null
 )
 returns json
 language plpgsql
@@ -343,8 +350,8 @@ begin
 
   -- Insert subscriber
   begin
-    insert into public.subscribers (name, email, lang, newsletter, status)
-    values (sub_name, lower(sub_email), sub_lang, sub_newsletter, 'active');
+    insert into public.subscribers (name, email, lang, newsletter, status, source)
+    values (sub_name, lower(sub_email), sub_lang, sub_newsletter, 'active', sub_source);
     return json_build_object('success', true);
   exception when unique_violation then
     -- Email already exists — not an error for the user

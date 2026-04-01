@@ -25,12 +25,13 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "No record" }), { status: 400 });
     }
 
-    // Get PDF URL from config
+    // Get PDF URL from config (language-specific)
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const pdfKey = record.lang === "en" ? "pdf_url_en" : "pdf_url_es";
     const { data: cfg } = await supabase
       .from("config")
       .select("value")
-      .eq("key", "pdf_url")
+      .eq("key", pdfKey)
       .single();
     const pdfUrl = cfg?.value || "";
 

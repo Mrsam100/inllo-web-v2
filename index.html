@@ -7,27 +7,26 @@
 <meta name="description" content="Descarga gratis la guía de meditación de INLLO — Instituto Liliana Lorna. Aprende a meditar en solo 5 minutos al día con esta guía PDF de 8 páginas para principiantes.">
 <meta name="theme-color" content="#f9f5ef">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23191510'/><text x='50' y='68' font-family='serif' font-size='52' fill='%23b8943a' text-anchor='middle' font-weight='300'>I</text></svg>">
-<link rel="canonical" href="https://inllo.com/">
-<link rel="alternate" hreflang="es" href="https://inllo.com/?lang=es">
-<link rel="alternate" hreflang="en" href="https://inllo.com/?lang=en">
-<link rel="alternate" hreflang="x-default" href="https://inllo.com/">
+<link rel="canonical" href="https://inlloweb.vercel.app/">
+<link rel="alternate" hreflang="es" href="https://inlloweb.vercel.app/?lang=es">
+<link rel="alternate" hreflang="en" href="https://inlloweb.vercel.app/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://inlloweb.vercel.app/">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Guía Gratuita para Aprender a Meditar — INLLO">
 <meta property="og:description" content="Descarga gratis la guía de meditación de 8 páginas del Instituto Liliana Lorna. Aprende a meditar en 5 minutos al día.">
-<meta property="og:url" content="https://inllo.com/">
+<meta property="og:url" content="https://inlloweb.vercel.app/">
 <meta property="og:locale" content="es_ES">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:site_name" content="INLLO — Instituto Liliana Lorna">
-<!-- og:image — replace with your actual 1200x630 image URL -->
-<meta property="og:image" content="https://inllo.com/og-image.jpg">
+<meta property="og:image" content="https://drive.google.com/thumbnail?id=1B7bO4wl2oqzxJ5Rpr1hny1L-Pmce6AnW&sz=w1200">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Guía Gratuita para Aprender a Meditar — INLLO">
 <meta name="twitter:description" content="Descarga gratis la guía de meditación de 8 páginas del Instituto Liliana Lorna.">
-<meta name="twitter:image" content="https://inllo.com/og-image.jpg">
+<meta name="twitter:image" content="https://drive.google.com/thumbnail?id=1B7bO4wl2oqzxJ5Rpr1hny1L-Pmce6AnW&sz=w1200">
 <!-- Schema.org JSON-LD -->
 <script type="application/ld+json">
 {
@@ -35,12 +34,12 @@
   "@type": "WebPage",
   "name": "Guía Gratuita para Aprender a Meditar",
   "description": "Descarga gratis la guía de meditación de INLLO. Aprende a meditar en 5 minutos al día.",
-  "url": "https://inllo.com/",
+  "url": "https://inlloweb.vercel.app/",
   "inLanguage": ["es", "en"],
   "publisher": {
     "@type": "Organization",
     "name": "INLLO — Instituto Liliana Lorna",
-    "url": "https://inllo.com/"
+    "url": "https://inlloweb.vercel.app/"
   },
   "mainEntity": {
     "@type": "DigitalDocument",
@@ -672,8 +671,8 @@ body { font-family: 'Raleway', sans-serif; font-weight: 300; overflow-x: hidden;
   <div class="guide-wrap gs-hidden">
     <div class="guide-book">
       <div class="book-lang-tabs">
-        <button class="book-lang-tab active" onclick="switchBookPreview('es')">Español</button>
-        <button class="book-lang-tab" onclick="switchBookPreview('en')">English</button>
+        <button class="book-lang-tab active" onclick="switchBookPreview('es',event)">Español</button>
+        <button class="book-lang-tab" onclick="switchBookPreview('en',event)">English</button>
       </div>
       <div class="book-3d">
         <img class="book-cover-img" id="bookCoverImg"
@@ -1362,11 +1361,11 @@ async function downloadPdf(pdfLang) {
 // ═══════════════════════════════════════════════════
 //  BOOK PREVIEW LANGUAGE SWITCH
 // ═══════════════════════════════════════════════════
-function switchBookPreview(bookLang) {
+function switchBookPreview(bookLang, evt) {
   const img = document.getElementById('bookCoverImg');
   const tabs = document.querySelectorAll('.book-lang-tab');
   tabs.forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+  if (evt && evt.target) evt.target.classList.add('active');
 
   const ids = { es: '1B7bO4wl2oqzxJ5Rpr1hny1L-Pmce6AnW', en: '1InJNU3HytwRgh4AsWFQmWTgzlw9Ob-AM' };
   const newSrc = `https://drive.google.com/thumbnail?id=${ids[bookLang]}&sz=w800`;

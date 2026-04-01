@@ -72,7 +72,7 @@ serve(async (req) => {
     // Resend: send individually for personalization (or use batch endpoint)
     // Using Resend batch endpoint for efficiency
     const batch = subs.map((s: any) => ({
-      from: "INLLO — Instituto Liliana Lorna <hola@inllo.com>",
+      from: "INLLO — Instituto Liliana Lorna <onboarding@resend.dev>",
       to: [s.email],
       subject,
       html: htmlContent + unsubFooter,

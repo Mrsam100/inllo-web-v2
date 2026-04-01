@@ -539,6 +539,17 @@ body { font-family: 'Raleway', sans-serif; font-weight: 300; overflow-x: hidden;
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
 .chart-box { background: var(--abg2); border: 1px solid var(--abord); border-radius: 16px; padding: 24px; }
 .chart-title { font-size: 0.62rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--amid); margin-bottom: 20px; }
+.ab-row { display: flex; flex-direction: column; gap: 16px; }
+.ab-variant { display: flex; align-items: center; gap: 12px; }
+.ab-label { font-size: 0.72rem; color: var(--atext); min-width: 140px; display: flex; align-items: center; gap: 8px; }
+.ab-tag { font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.25); }
+.ab-tag.b { background: rgba(184,148,58,0.15); color: var(--gold); border-color: rgba(184,148,58,0.25); }
+.ab-tag.n { background: rgba(158,142,126,0.15); color: var(--amid); border-color: rgba(158,142,126,0.25); }
+.ab-bar-track { flex: 1; height: 10px; background: rgba(184,148,58,0.08); border-radius: 5px; overflow: hidden; }
+.ab-bar-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--green), #66cc99); transition: width 0.6s ease; }
+.ab-bar-fill.b { background: linear-gradient(90deg, var(--gold), var(--gold-bright)); }
+.ab-bar-fill.n { background: linear-gradient(90deg, var(--amid), var(--alight)); }
+.ab-count { font-size: 0.82rem; font-weight: 600; color: var(--atext); min-width: 40px; text-align: right; }
 .lang-bars { display: flex; flex-direction: column; gap: 14px; }
 .lang-row { display: flex; align-items: center; gap: 12px; }
 .lang-name { font-size: 0.7rem; color: var(--atext); width: 24px; flex-shrink: 0; }
@@ -1059,6 +1070,30 @@ body { font-family: 'Raleway', sans-serif; font-weight: 300; overflow-x: hidden;
           <div class="kpi"><div class="kpi-num" id="kUnsub">0</div><div class="kpi-label">Bajas</div><div class="kpi-sub" id="kUnsubSub">—</div></div>
         </div>
 
+        <!-- A/B TEST COMPARISON -->
+        <div class="charts-row" style="margin-bottom:14px">
+          <div class="chart-box" style="grid-column:1/-1">
+            <div class="chart-title">A/B Test — Conversiones por Versión</div>
+            <div class="ab-row">
+              <div class="ab-variant">
+                <div class="ab-label">Versión A <span class="ab-tag">Original</span></div>
+                <div class="ab-bar-track"><div class="ab-bar-fill" id="abBarA" style="width:0%"></div></div>
+                <div class="ab-count" id="abCountA">0</div>
+              </div>
+              <div class="ab-variant">
+                <div class="ab-label">Versión B <span class="ab-tag b">V2 Test</span></div>
+                <div class="ab-bar-track"><div class="ab-bar-fill b" id="abBarB" style="width:0%"></div></div>
+                <div class="ab-count" id="abCountB">0</div>
+              </div>
+              <div class="ab-variant">
+                <div class="ab-label">Sin fuente <span class="ab-tag n">Legacy</span></div>
+                <div class="ab-bar-track"><div class="ab-bar-fill n" id="abBarN" style="width:0%"></div></div>
+                <div class="ab-count" id="abCountN">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="charts-row">
           <div class="chart-box">
             <div class="chart-title">Por Idioma</div>
@@ -1166,6 +1201,7 @@ const SUPABASE_URL  = "https://nbtlgqjtzwccucaphrfm.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5idGxncWp0endjY3VjYXBocmZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NjExNDcsImV4cCI6MjA4OTQzNzE0N30.Jr_bHWruGFHqEJN5BLBWaNNW2RbMe_QYmbwaIoIJiDY";
 // Admin email — set this to your Supabase Auth admin user email
 const ADMIN_EMAIL   = "team.superorbit@gmail.com";
+const SITE_SOURCE   = "B";
 const PDF_URL_ES = "https://drive.google.com/uc?export=download&id=1B7bO4wl2oqzxJ5Rpr1hny1L-Pmce6AnW";
 const PDF_URL_EN = "https://drive.google.com/uc?export=download&id=1InJNU3HytwRgh4AsWFQmWTgzlw9Ob-AM";
 
@@ -1271,6 +1307,7 @@ async function handleSubmit() {
       sub_lang: lang,
       sub_newsletter: nlOn,
       client_ip_hash: ipHash,
+      sub_source: SITE_SOURCE,
     });
 
     if (insertErr) throw insertErr;
@@ -1459,6 +1496,21 @@ async function refreshAdmin() {
   document.getElementById('enBar').style.width = Math.round(en/max*100) + '%';
   document.getElementById('esPct').textContent  = es + ' (' + (total > 0 ? Math.round(es/total*100) : 0) + '%)';
   document.getElementById('enPct').textContent  = en + ' (' + (total > 0 ? Math.round(en/total*100) : 0) + '%)';
+
+  // A/B Test stats
+  try {
+    const { count: countA } = await sb.from('subscribers').select('*', { count: 'exact', head: true }).eq('source', 'A');
+    const { count: countB } = await sb.from('subscribers').select('*', { count: 'exact', head: true }).eq('source', 'B');
+    const cA = countA ?? 0, cB = countB ?? 0;
+    const cN = total - cA - cB;
+    const abMax = Math.max(cA, cB, cN, 1);
+    document.getElementById('abCountA').textContent = cA;
+    document.getElementById('abCountB').textContent = cB;
+    document.getElementById('abCountN').textContent = cN;
+    document.getElementById('abBarA').style.width = Math.round(cA/abMax*100) + '%';
+    document.getElementById('abBarB').style.width = Math.round(cB/abMax*100) + '%';
+    document.getElementById('abBarN').style.width = Math.round(cN/abMax*100) + '%';
+  } catch { /* A/B stats not critical */ }
 
   // Sub count
   document.getElementById('subCount2').textContent = total;
